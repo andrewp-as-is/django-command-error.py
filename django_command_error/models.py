@@ -3,14 +3,6 @@ __all__ = ['Error']
 from django.db import models
 
 
-class VerboseName(str):
-    def __init__(self, func):
-        self.func = func
-
-    def decode(self, encoding, erros):
-        return self.func().decode(encoding, erros)
-
-
 class Error(models.Model):
     app = models.TextField()
     name = models.TextField()
@@ -33,4 +25,3 @@ class Error(models.Model):
            models.Index(fields=['-created_at',]),
         ]
         ordering = ('-created_at',)
-        verbose_name_plural = VerboseName(lambda: "Errors (%d)" % Error.objects.all().count())
