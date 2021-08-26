@@ -1,11 +1,28 @@
+import sys
+import traceback
+
 from django.core.management.base import BaseCommand, CommandError, OutputWrapper
 from django.core.management.color import color_style, no_style
 
 from ..decorators import command_error
+from ..models import Error
 
 class ErrorMixin:
     def error(self,e,*args,**options):
-        save(type(self).__module__,e,*args,**options)
+        module_name = type(self).__module__
+        app, name = module_name.split('.')[-4], module_name.split('.')[-1]
+        Error(
+            app=app,
+            name=name,
+            sys_argv = ' '.join(sys.argv),
+            args = ' '.join(args) if args else None,
+            options = "\n".join(sorted(
+                map(lambda kv:'%s=%s' % (kv[0],kv[1]),filter(lambda kv:kv[1]!=None,options.items()))
+            )),
+            exc_type='.'.join(filter(None,[type(e).__module__,type(e).__name__])),
+            exc_value=str(e),
+            exc_traceback='\n'.join(traceback.format_tb(e.__traceback__))
+        ).save()
 
 
 class ErrorCommand(ErrorMixin,BaseCommand):

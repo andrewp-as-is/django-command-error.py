@@ -1,3 +1,5 @@
+import traceback
+
 from django.core.management import get_commands
 from django.core.management.base import CommandError
 
